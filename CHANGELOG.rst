@@ -2,8 +2,8 @@
 Changelog for package twist_mux
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-Forthcoming
------------
+4.4.0 (2024-10-01)
+------------------
 * TwistStamped Support (`#50 <https://github.com/ros-teleop/twist_mux/issues/50>`_)
 * Contributors: luis-camero
 

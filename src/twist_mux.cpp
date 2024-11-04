@@ -51,14 +51,14 @@
  * @return true is any of the absolute velocity components has increased
  */
 bool hasIncreasedAbsVelocity(
-  const geometry_msgs::msg::Twist & old_twist,
-  const geometry_msgs::msg::Twist & new_twist)
+  const geometry_msgs::msg::TwistStamped & old_twist,
+  const geometry_msgs::msg::TwistStamped & new_twist)
 {
-  const auto old_linear_x = std::abs(old_twist.linear.x);
-  const auto new_linear_x = std::abs(new_twist.linear.x);
+  const auto old_linear_x = std::abs(old_twist.twist.linear.x);
+  const auto new_linear_x = std::abs(new_twist.twist.linear.x);
 
-  const auto old_angular_z = std::abs(old_twist.angular.z);
-  const auto new_angular_z = std::abs(new_twist.angular.z);
+  const auto old_angular_z = std::abs(old_twist.twist.angular.z);
+  const auto new_angular_z = std::abs(new_twist.twist.angular.z);
 
   return (old_linear_x < new_linear_x) || (old_angular_z < new_angular_z);
 }
@@ -85,7 +85,7 @@ void TwistMux::init()
 
   /// Publisher for output topic:
   cmd_pub_ =
-    this->create_publisher<geometry_msgs::msg::Twist>(
+    this->create_publisher<geometry_msgs::msg::TwistStamped>(
     "cmd_vel_out",
     rclcpp::QoS(rclcpp::KeepLast(1)));
 
@@ -107,7 +107,7 @@ void TwistMux::updateDiagnostics()
   diagnostics_->updateStatus(status_);
 }
 
-void TwistMux::publishTwist(const geometry_msgs::msg::Twist::ConstSharedPtr & msg)
+void TwistMux::publishTwist(const geometry_msgs::msg::TwistStamped::ConstSharedPtr & msg)
 {
   cmd_pub_->publish(*msg);
 }
@@ -184,6 +184,14 @@ bool TwistMux::hasPriority(const VelocityTopicHandle & twist)
     }
   }
 
+  if (velocity_name == "NULL") {
+    geometry_msgs::msg::TwistStamped twist_msg = geometry_msgs::msg::TwistStamped();
+    twist_msg.header.stamp = this->now();
+    twist_msg.twist.linear.x = 0.0;
+    twist_msg.twist.angular.z = 0.0;
+    this->publishTwist(std::make_shared<geometry_msgs::msg::TwistStamped>(twist_msg));
+    return false;
+  }
   return twist.getName() == velocity_name;
 }
 
